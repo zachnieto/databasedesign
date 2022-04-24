@@ -1,59 +1,116 @@
-const sha256 = require('js-sha256');
+import mysql from "mysql2";
+import bcrypt from "bcrypt";
 
-const mysql = require('mysql2')
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: 'root',
-    database: 'final'
+    database: 'gameusers'
 })
 connection.connect()
 
-const login = (req, res) => {
-    console.log(req.body)
+const SALT_ROUNDS = 10
 
-    username = req.body.username
-    password_hash = sha256(req.body.password)
+const login = async (req, res) => {
+    const username = req.body.params.username
+    const password = req.body.params.password
 
-    connection.query('SELECT * FROM user WHERE user.username = ? AND user.password_hash = ?',
-        [username, password_hash],
-        (err, rows, fields) => {
+    connection.query('CALL getUsers(?)',
+        [username],
+        async (err, rows) => {
             if (err) throw err
-            if (rows.length !== 0) {
-                res.send("Logging in")
-                console.log("Logging in")
+
+            const result = rows[0]
+
+            if (result.length !== 0 && await bcrypt.compare(password, result[0].pass)) {
+                req.session.user = result[0]
+                res.json(result[0])
+                console.log(req.session)
             } else {
-                res.send("Incorrect login")
+                res.status(403).send("Incorrect login")
                 console.log("Incorrect login")
             }
         })
 }
 
-const signup = (req, res) => {
-    console.log(req.body)
+const createAccount = async (req, res) => {
+    const username = req.body.params.username
+    const password = req.body.params.password
+    const password_hash = await bcrypt.hash(password, SALT_ROUNDS)
 
-    username = req.body.username
-    password_hash = sha256(req.body.password)
-
-    connection.query(`SELECT * FROM user WHERE username = username`,
-        [username, password_hash],
+    connection.query(`CALL getUsers(?)`,
+        [username],
         (err, rows, fields) => {
             if (err) throw err
-            if (rows.length !== 0) {
-                res.send("Account already exists")
+            const result = rows[0]
+            console.log(result)
+            if (result.length !== 0) {
+                res.status(403).send("Account already exists")
                 console.log("Account already exists")
             }
-            else
-                connection.query(`INSERT INTO user (username, password_hash) VALUES (?, ?)`, [username, password_hash],
+            else {
+                connection.query(`CALL add_account(?, ?)`, [username, password_hash],
                     (err, rows, fields) => {
                         if (err) throw err
-                        res.send("Account created")
+                        const user = {
+                            userName: username
+                        }
+                        req.session.user = user
+                        res.json(user)
                         console.log("Account created")
                     })
+            }
         })
 }
 
-module.exports = {
-    signup,
-    login,
+const getSession = (req, res) => {
+    console.log("Fetching session")
+    console.log(req.session)
+    res.send(req.session);
 }
+
+const logout = async (req, res) => {
+    console.log("Logging out")
+    req.session.destroy();
+    res.sendStatus(200);
+};
+
+const deleteAccount = async (req, res) => {
+    const username = req.params.username
+    if (username !== req.session.user.userName)
+        return res.sendStatus(403)
+
+    console.log("Deleting account")
+
+    connection.query(`CALL delete_account(?)`,
+        [username],
+        (err, rows, fields) => {
+            if (err) throw err
+        })
+
+    req.session.destroy();
+    res.sendStatus(200);
+};
+
+const updateAccount = async (req, res) => {
+    const password = req.body.params.password
+    const password_hash = await bcrypt.hash(password, SALT_ROUNDS)
+    console.log("Updating password")
+    console.log(req.session.user)
+    connection.query(`CALL update_pass(?, ?)`,
+        [req.session.user.userName, password_hash],
+        (err, rows) => {
+            if (err) throw err
+        })
+
+    res.sendStatus(200);
+};
+
+export default (app) => {
+    app.post('/login', login)
+    app.get('/logout', logout)
+    app.get('/session', getSession)
+    app.delete('/account/:username', deleteAccount)
+    app.put('/account', updateAccount)
+    app.post('/account', createAccount)
+};

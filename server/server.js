@@ -1,19 +1,35 @@
-
-const account = require('./account');
-const express = require('express');
-const bodyParser = require('body-parser')
-const cors = require('cors')
+import express from 'express';
+import session from 'express-session';
+import cors from 'cors';
+import account from "./account.js";
+import env from 'custom-env';
 const app = express();
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json())
-app.use(cors())
 
+env.env('dev');
+app.use(cors({
+    credentials: true,
+    origin: process.env.REACT_APP || "http://localhost:3000"
+}));
+app.use(express.json());
 
-app.get('/hello',(req, res) =>
-    res.send('hello world'));
+let sess = {
+    secret: "SECRET",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        secure: true,
+    }
+};
 
-app.post('/login', account.login)
+if (process.env.APP_ENV === 'dev') {
+    sess.cookie.secure = false;
+} else {
+    sess.cookie.sameSite = 'none';
+}
 
-app.post('/signup', account.signup)
+app.set('trust proxy', 1);
+app.use(session(sess));
 
-app.listen(3000);
+account(app);
+
+app.listen(process.env.PORT || 4000);
