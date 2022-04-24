@@ -1,13 +1,6 @@
-import mysql from "mysql2";
 import bcrypt from "bcrypt";
+import connection from "./server.js";
 
-const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'gameusers'
-})
-connection.connect()
 
 const SALT_ROUNDS = 10
 

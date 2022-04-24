@@ -40,3 +40,42 @@
 .hover-hand {
   cursor: pointer;
 }
+
+.hero {
+  background-color: #383c4a;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: transform .3s;
+}
+
+.hero:hover {
+  transform: scale(1.02);
+}
+
+.heroname {
+  display: block;
+  font-size: large;
+  color: #fff200
+}
+
+.match {
+  background-color: #383c4a;
+  border-radius: 10px;
+  font-size: 1.25em;
+}
+
+.match-item {
+  padding: 1em
+}
+
+.result-W {
+  background-color: rgba(0, 255, 0, .4);
+}
+
+.result-L {
+  background-color: rgba(255, 0, 0, .4);
+}
+
+.match-delete-btn {
+  background-color: #920000 !important;
+}

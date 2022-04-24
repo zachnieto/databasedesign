@@ -7,7 +7,8 @@ import {
 } from "react-router-dom";
 import React, {useEffect, useState} from "react";
 import Profile from "./components/Profile";
-import api from "./services/server-service";
+import api, {BACKEND_SERVER} from "./services/server-service";
+import Matches from "./components/Matches";
 
 function App() {
 
@@ -16,7 +17,7 @@ function App() {
 
     useEffect(() => {
         const loadSession = async () => {
-            const sess = await api.get(`http://localhost:4000/session`)
+            const sess = await api.get(`${BACKEND_SERVER}/session`)
             console.log(sess.data)
             setSession(sess.data)
         }
@@ -30,6 +31,7 @@ function App() {
               <Routes>
                   <Route path="/" element={<Login session={session} setSession={setSession}/>} />
                   <Route path="/profile" element={<Profile session={session} setSession={setSession}/>} />
+                  <Route path="/matches/:game" element={<Matches session={session}/>} />
               </Routes>
           </Router>
       </div>

@@ -124,10 +124,10 @@ CREATE TABLE owuserstats
 
 
 insert into users (username, pass)values
-('davy', 'applepear32'),
-('alex', 'blackbear2'),
-('ricky441', 'turnabout21'),
-('chris1337', 'turnips43');
+('davy', '$2b$10$lSlZJIQmadgJFN4zm70V5uURgof73fi3ymdZyjCAPm9yfEdHynp6u'),
+('alex', '$2b$10$lSlZJIQmadgJFN4zm70V5uURgof73fi3ymdZyjCAPm9yfEdHynp6u'),
+('ricky441', '$2b$10$lSlZJIQmadgJFN4zm70V5uURgof73fi3ymdZyjCAPm9yfEdHynp6u'),
+('chris1337', '$2b$10$lSlZJIQmadgJFN4zm70V5uURgof73fi3ymdZyjCAPm9yfEdHynp6u');
 
 
 insert into champions (champion_name, lane, damagetype, releasedate) values
@@ -187,6 +187,24 @@ begin
 delimiter ;
 
 delimiter $$
+Create procedure getAllHeros()
+begin
+    select *
+	from owheros;
+    end$$
+    
+delimiter ;
+
+delimiter $$
+Create procedure getAllChamps()
+begin
+    select *
+	from champions;
+    end$$
+    
+delimiter ;
+
+delimiter $$
 Create procedure getChampStats(IN championName VarChar(50))
 begin
     select *
@@ -197,6 +215,7 @@ begin
     delimiter ;
     
     delimiter $$
+    
 Create procedure getUserStats(IN var_user VarChar(50))
 begin
     select *
@@ -207,6 +226,51 @@ begin
     delimiter ;
 
 delimiter $$
+
+Create procedure getLolMatches(IN var_user VarChar(50))
+begin
+    select *
+	from lolmatch
+    where username = var_user;
+    end$$
+    
+    delimiter ;
+
+delimiter $$
+
+Create procedure getOwMatches(IN var_user VarChar(50))
+begin
+    select *
+	from owmatch
+    where username = var_user;
+    end$$
+    
+    delimiter ;
+
+delimiter $$
+
+Create procedure getUserChampStats(IN var_user VarChar(50), IN championName VarChar(50))
+begin
+    select *
+	from loluserstats
+    where username = var_user and champion = championName;
+    end$$
+    
+    delimiter ;
+
+delimiter $$
+
+Create procedure getUserHeroStats(IN var_user VarChar(50), IN heroName VarChar(50))
+begin
+    select *
+	from owuserstats
+    where username = var_user and hero = heroName;
+    end$$
+    
+    delimiter ;
+
+delimiter $$
+
 Create procedure initialize_champ_stats(champ VarChar(50), lne VarChar(50))
 begin
 	declare tdeaths INT default 0;

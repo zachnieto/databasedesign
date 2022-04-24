@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 import {Navigate, useNavigate} from "react-router-dom";
-import api from "../services/server-service";
+import api, {BACKEND_SERVER} from "../services/server-service";
 
 const Login = ({session, setSession}) => {
     const [loggedIn, setLoggedIn] = useState(true)
@@ -12,7 +12,7 @@ const Login = ({session, setSession}) => {
     const onLoginSignup = async () => {
         const endpoint = loggedIn ? "login" : "account"
 
-        await api.post(`http://localhost:4000/${endpoint}`, {
+        await api.post(`${BACKEND_SERVER}/${endpoint}`, {
                 params: {
                     username: username,
                     password: password
