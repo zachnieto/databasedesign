@@ -205,6 +205,16 @@ begin
     end$$
     
     delimiter ;
+    
+delimiter $$
+Create procedure getOWUserStats(IN var_user VarChar(50))
+begin
+    select *
+    from owuserstats
+    where username = var_user;
+ end$$
+    
+    delimiter ;
 
 delimiter $$
 Create procedure initialize_champ_stats(champ VarChar(50), lne VarChar(50))
