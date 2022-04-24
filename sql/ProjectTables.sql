@@ -7,7 +7,7 @@ CREATE TABLE users
 (
   userid             INT            PRIMARY KEY   AUTO_INCREMENT,
   userName     VARCHAR(50)    NOT NULL,
-  pass        VARCHAR(50)    NOT NULL,
+  pass        VARCHAR(60)    NOT NULL,
   Unique(userName)
 );
 
@@ -398,7 +398,7 @@ begin
 delimiter ;
 
 delimiter $$
-Create procedure add_account(var_user VarChar(50), var_pass VarChar(50))
+Create procedure add_account(var_user VarChar(50), var_pass VarChar(60))
 begin
     insert into users (UserName, pass) values
     (var_user, var_pass);
@@ -407,7 +407,7 @@ begin
 delimiter ;
 
 delimiter $$
-Create procedure update_pass(var_user VarChar(50), var_pass VarChar(50))
+Create procedure update_pass(var_user VarChar(50), var_pass VarChar(60))
 begin
     update users set pass = var_pass
     where userName = var_user;
