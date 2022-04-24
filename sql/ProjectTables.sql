@@ -7,7 +7,7 @@ CREATE TABLE users
 (
   userid             INT            PRIMARY KEY   AUTO_INCREMENT,
   userName     VARCHAR(50)    NOT NULL,
-  pass        VARCHAR(60)    NOT NULL,
+  pass        VARCHAR(50)    NOT NULL,
   Unique(userName)
 );
 
@@ -143,21 +143,7 @@ insert into champions (champion_name, lane, damagetype, releasedate) values
 ('Zilean', 'Support', 'AP', '2009-02-21'),
 ('Sion', 'Top', 'AD', '2009-02-21');
 
-insert into lolmatch (username, champion, kills, deaths, assists, towersDestroyed, result, lane) values
-('davy', 'Aatrox', 12, 3, 5, 5, 'W', 'Top'),
-('alex', 'Master Yi', 2, 6, 5, 1, 'W', 'Mid'),
-('ricky441', 'Annie', 2, 6, 5, 1, 'W', 'Support'),
-('davy',  'Aatrox', 2, 3, 2, 0, 'L', 'Mid'),
-('alex', 'Master Yi', 7, 6, 2, 1, 'W', 'Jungle'),
-('ricky441',  'Annie', 2, 0, 5, 7, 'W', 'Mid'),
-('davy', 'Ryze', 10, 4, 5, 5, 'W', 'Mid'),
-('alex',  'Ryze', 2, 6, 5, 1, 'L', 'Mid'),
-('ricky441', 'Annie', 2, 6, 5, 1, 'W', 'Mid'),
-('alex', 'Aatrox', 5, 3, 2, 1, 'L', 'Top'),
-('davy', 'Annie', 2, 0, 5, 7, 'W', 'Mid'),
-('davy', 'Ryze', 14, 8, 5, 5, 'L', 'Mid'),
-('alex', 'Ryze', 8, 6, 5, 1, 'L', 'Mid'),
-('ricky441', 'Annie', 10, 2, 5, 1, 'W', 'Mid');
+
 
 insert into owheros (hero_name, drole, ultimateability, eability, shiftability, releasedate) values 
 ('D VA', 'Tank', 'Self-Destruct', 'Micro Missiles', 'Boosters', '2016-05-24'),
@@ -167,19 +153,6 @@ insert into owheros (hero_name, drole, ultimateability, eability, shiftability, 
 ('Pharah', 'Damage', 'Barrage',  'Concussive Blast', 'Jump Jet', '2016-05-24'),
 ('Mercy', 'Support', 'Valkyrie', 'Resurrect', 'Guardian Angel', '2016-05-24'),
 ('Zenyatta', 'Support', 'Transcendence', 'Orb of Discord', 'Orb of Harmony', '2016-05-24');
-
-insert into owmatch (username, hero, lasthits, deaths, eliminations, gametype, medals, result) values
-('davy', 'D VA', 12, 3, 17, 'Escort', 2, 'W'),
-('davy', 'Tracer', 10, 8, 27, 'Escort', 3, 'W'),
-('davy','Zenyatta', 3, 3, 34, 'Escort', 2, 'W'),
-('davy', 'Zenyatta', 0, 3, 23, 'Escort', 2, 'L'),
-('davy', 'D VA', 10, 3, 38, 'Escort', 3, 'W'),
-('chris1337', 'D VA', 0, 3, 17, 'Escort', 0, 'L'),
-('chris1337', 'D VA', 8, 3, 17, 'Escort', 1, 'L'),
-('chris1337', 'Reaper', 12, 3, 37, 'Escort', 2, 'W'),
-('chris1337', 'D VA', 8, 8, 17, 'Escort', 0, 'L'),
-('chris1337', 'D VA', 16, 5, 38, 'Escort', 2, 'W'),
-('chris1337', 'Mercy', 0, 3, 37, 'Escort', 1, 'W');
 
 
 
@@ -242,9 +215,9 @@ begin
     declare wins INT default 0;
     declare losses INT default 0;
     declare precense INT default 0;
-    set tkills = (select sum(kills) from lolmatch where lolmatch.champion = champ and lolmatch.lane = lne);
-    set tdeaths = (select sum(deaths) from lolmatch where lolmatch.champion = champ and lolmatch.lane = lne);
-    set tassists = (select sum(assists) from lolmatch where lolmatch.champion = champ and lolmatch.lane = lne);
+    set tkills = (select coalesce(sum(kills), 0) from lolmatch where lolmatch.champion = champ and lolmatch.lane = lne);
+    set tdeaths = (select coalesce(sum(deaths), 0) from lolmatch where lolmatch.champion = champ and lolmatch.lane = lne);
+    set tassists = (select coalesce(sum(assists), 0) from lolmatch where lolmatch.champion = champ and lolmatch.lane = lne);
     set wins = (select count(*) from lolmatch where champion = champ and lane = lne and result = 'W');
     set losses = (select count(*) from lolmatch where champion = champ and lane = lne and result = 'L');
     set precense = (select count(*) from lolchampstats where champion = champ and lane = lne);
@@ -269,18 +242,21 @@ begin
     declare losses INT default 0;
     declare precense INT default 0;
     declare tottows INT default 0;
-    set tkills = (select sum(kills) from lolmatch where champion = champ and lolmatch.username = var_user);
-    set tdeaths = (select sum(deaths) from lolmatch where lolmatch.champion = champ and lolmatch.username = var_user);
-    set tassists = (select sum(assists) from lolmatch where lolmatch.champion = champ and lolmatch.username = var_user);
+    declare isuser INT default 0;
+    set tkills = (select coalesce(sum(kills), 0) from lolmatch where champion = champ and lolmatch.username = var_user);
+    set tdeaths = (select coalesce(sum(deaths), 0) from lolmatch where lolmatch.champion = champ and lolmatch.username = var_user);
+    set tassists = (select coalesce(sum(assists), 0) from lolmatch where lolmatch.champion = champ and lolmatch.username = var_user);
     set wins = (select count(*) from lolmatch where lolmatch.champion = champ and lolmatch.username = var_user and result = 'W');
     set losses = (select count(*) from lolmatch where lolmatch.champion = champ and lolmatch.username = var_user and result = 'L');
     set precense = (select count(*) from loluserstats where champion = champ and username = var_user);
-    set tottows = (select sum(towersDestroyed) from lolmatch where lolmatch.champion = champ and lolmatch.userName = var_user);
-    IF precense > 0
+    set tottows = (select coalesce(sum(towersDestroyed), 0) from lolmatch where lolmatch.champion = champ and lolmatch.userName = var_user);
+    set isuser = (select count(*) from users where users.userName = var_user);
+    IF precense > 0 and isuser > 0
     THEN
-    update loluserstats set totkills = tkills, totdeaths = tdeaths, totassists = tassists, totwins = wins, totlosses = losses, tottowersDestroyed = tottowers
+    update loluserstats set totkills = tkills, totdeaths = tdeaths, totassists = tassists, totwins = wins, totlosses = losses, tottowersDestroyed = tottows
     where (username, champ) = (var_user, champ);
-    ELSE
+    ELSEif isuser > 0
+    then
     Insert into loluserstats (username, champion, totkills, totdeaths, totassists, tottowersDestroyed, totwins, totlosses) values
     (var_user, champ, tkills, tdeaths, tassists, tottows, wins, losses);
     end if;
@@ -297,17 +273,20 @@ begin
     declare losses INT default 0;
     declare precense INT default 0;
     declare totmeds INT default 0;
-    set tkills = (select sum(eliminations) from owmatch where hero = var_hero and username = var_user);
-    set tdeaths = (select sum(deaths) from owmatch where hero = var_hero and username = var_user);
+    declare isuser INT default 0;
+    set tkills = (select coalesce(sum(eliminations), 0) from owmatch where hero = var_hero and username = var_user);
+    set tdeaths = (select coalesce(sum(deaths), 0) from owmatch where hero = var_hero and username = var_user);
     set wins = (select count(*) from owmatch where hero = var_hero and username = var_user and result = 'W');
     set losses = (select count(*) from owmatch where hero = var_hero and username = var_user and result = 'L');
     set precense = (select count(*) from owuserstats where hero = var_hero and username = var_user);
-    set totmeds = (select sum(medals) from owmatch where hero = var_hero and username = var_user);
-    IF precense > 0
+    set totmeds = (select coalesce(sum(medals), 0) from owmatch where hero = var_hero and username = var_user);
+    set isuser = (select count(*) from users where users.userName = var_user);
+    IF precense > 0 and isuser > 0
     THEN
-    update owuserstats set elims = tkills, totdeaths = tdeaths, totwins = wins, totlosses = losses, medals = totmedals
+    update owuserstats set elims = tkills, deaths = tdeaths, totwins = wins, totlosses = losses, medals = totmeds
     where (username, hero) = (var_user, hero);
-    ELSE
+    ELSEif isuser > 0
+    then
     Insert into owuserstats (username, hero, elims, deaths, medals, totwins, totlosses) values
     (var_user, var_hero, tkills, tdeaths, totmeds, wins, losses);
     end if;
@@ -407,7 +386,11 @@ delimiter ;
 delimiter $$
 Create procedure delete_account(var_user VarChar(50))
 begin
-    delete
+    delete from lolmatch where lolmatch.username = var_user;
+    delete from loluserstats where loluserstats.username = var_user;
+    delete from owmatch where owmatch.username = var_user;
+    delete from owuserstats where owuserstats.username = var_user;
+	delete
 	from users
     where userName = var_user;
     end$$
@@ -415,7 +398,7 @@ begin
 delimiter ;
 
 delimiter $$
-Create procedure add_account(var_user VarChar(50), var_pass VarChar(60))
+Create procedure add_account(var_user VarChar(50), var_pass VarChar(50))
 begin
     insert into users (UserName, pass) values
     (var_user, var_pass);
@@ -424,11 +407,90 @@ begin
 delimiter ;
 
 delimiter $$
-Create procedure update_pass(var_user VarChar(50), var_pass VarChar(60))
+Create procedure update_pass(var_user VarChar(50), var_pass VarChar(50))
 begin
     update users set pass = var_pass
     where userName = var_user;
     end$$
     
 delimiter ;
+
+
+Create trigger lolcstats_after_delete
+AFTER delete ON lolmatch
+for each row
+	call initialize_champ_stats(OLD.champion, OLD.lane);
+
+
+
+
+Create trigger lolustats_after_delete
+AFTER delete ON lolmatch
+for each row
+    call initialize_user_stats(OLD.username, old.champion);
+
+
+
+
+Create trigger lolcstats_after_insert
+AFTER insert ON lolmatch
+for each row
+	call initialize_champ_stats(new.champion, new.lane);
+
+
+
+
+Create trigger lolustats_after_insert
+AFTER insert ON lolmatch
+for each row
+    call initialize_user_stats(new.username, new.champion);
+
+
+
+
+Create trigger owstats_after_delete
+AFTER delete ON owmatch
+for each row
+	call initialize_ow_stats(old.hero, old.username);
+
+
+
+
+Create trigger owstats_after_insert
+AFTER insert ON owmatch
+for each row
+	call initialize_ow_stats(new.hero, new.username);
+    
+
+
+
+insert into lolmatch (username, champion, kills, deaths, assists, towersDestroyed, result, lane) values
+('davy', 'Aatrox', 12, 3, 5, 5, 'W', 'Top'),
+('alex', 'Master Yi', 2, 6, 5, 1, 'W', 'Mid'),
+('ricky441', 'Annie', 2, 6, 5, 1, 'W', 'Support'),
+('davy',  'Aatrox', 2, 3, 2, 0, 'L', 'Mid'),
+('alex', 'Master Yi', 7, 6, 2, 1, 'W', 'Jungle'),
+('ricky441',  'Annie', 2, 0, 5, 7, 'W', 'Mid'),
+('davy', 'Ryze', 10, 4, 5, 5, 'W', 'Mid'),
+('alex',  'Ryze', 2, 6, 5, 1, 'L', 'Mid'),
+('ricky441', 'Annie', 2, 6, 5, 1, 'W', 'Mid'),
+('alex', 'Aatrox', 5, 3, 2, 1, 'L', 'Top'),
+('davy', 'Annie', 2, 0, 5, 7, 'W', 'Mid'),
+('davy', 'Ryze', 14, 8, 5, 5, 'L', 'Mid'),
+('alex', 'Ryze', 8, 6, 5, 1, 'L', 'Mid'),
+('ricky441', 'Annie', 10, 2, 5, 1, 'W', 'Mid');
+
+
+insert into owmatch (username, hero, lasthits, deaths, eliminations, gametype, medals, result) values
+('davy', 'D VA', 12, 3, 17, 'Escort', 2, 'W'),
+('davy', 'Tracer', 10, 8, 27, 'Escort', 3, 'W'),
+('davy','Zenyatta', 3, 3, 34, 'Escort', 2, 'W'),
+('davy', 'Zenyatta', 0, 3, 23, 'Escort', 2, 'L'),
+('davy', 'D VA', 10, 3, 38, 'Escort', 3, 'W'),
+('chris1337', 'D VA', 0, 3, 17, 'Escort', 0, 'L'),
+('chris1337', 'D VA', 8, 3, 17, 'Escort', 1, 'L'),
+('chris1337', 'Reaper', 12, 3, 37, 'Escort', 2, 'W'),
+('chris1337', 'D VA', 8, 8, 17, 'Escort', 0, 'L'),
+('chris1337', 'D VA', 16, 5, 38, 'Escort', 2, 'W'),
+('chris1337', 'Mercy', 0, 3, 37, 'Escort', 1, 'W');
 
