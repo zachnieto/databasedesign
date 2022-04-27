@@ -6,17 +6,18 @@ import env from 'custom-env';
 import mysql from "mysql2";
 import stats from "./stats.js";
 const app = express();
+env.env('dev');
 
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'root',
-    database: 'gameusers'
+    host: process.env.HOST,
+    user: process.env.USER,
+    password: process.env.PASSWORD,
+    database: process.env.DATABASE
 })
 connection.connect()
 
 
-env.env('dev');
+
 app.use(cors({
     credentials: true,
     origin: process.env.REACT_APP || "http://localhost:3000"
@@ -32,10 +33,10 @@ let sess = {
     }
 };
 
-if (process.env.APP_ENV === 'dev') {
-    sess.cookie.secure = false;
-} else {
+if (process.env.APP_ENV !== 'dev') {
     sess.cookie.sameSite = 'none';
+} else {
+    sess.cookie.secure = false;
 }
 
 app.set('trust proxy', 1);
